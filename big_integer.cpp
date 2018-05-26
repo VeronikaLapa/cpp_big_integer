@@ -6,7 +6,7 @@
 
 using namespace std;
 
-unsigned int const MAX_DIGIT = UINT32_MAX;
+unsigned int const MAX_DIGIT = std::numeric_limits<unsigned int>::max();
 int const BASE = 32;
 int const BASE_10_INTLEN = 9;
 int const MAX_INT_LEN9 = 1000000000;
@@ -186,11 +186,11 @@ big_integer abs(big_integer const& a) {
 big_integer operator<<(big_integer a, int b) {
 	vector<unsigned int> res(a.length() + 1);
 	unsigned int carry = 0;
-	for (size_t i = 0; i < a.length(); i++) {
+	for (size_t i = 0; i < a.length() + 1; i++) {
 		res[i] = (a.get_digit(i) << b) + carry;
 		carry = (a.get_digit(i) >> (BASE - b));
 	}
-	res[a.length()] = carry;
+	//res[a.length()] = carry;
 	return big_integer(a.sign, res);
 }
 big_integer operator>>(big_integer a, int b) {
@@ -285,7 +285,7 @@ big_integer div_big_short(big_integer a, unsigned int const& b) {
 	size_t len = a.length();
 	for (size_t i = 0; i < len; i++) {
 		temp = (carry *  (MAXD + 1)) + a.get_digit(len - i - 1);
-		res[len - i - 1] = temp / b;
+		res[len - i - 1] = temp / ull_cast(b);
 		carry = temp % b;
 	}
 	return big_integer(0, res);
@@ -310,7 +310,7 @@ bool cmp_prefix(big_integer& r, big_integer& dq, size_t k, size_t m) {
 }
 void difference(big_integer& r, big_integer & dq, size_t k, size_t m) {
 	unsigned long long borrow = 0, diff, b = ull_cast(MAX_DIGIT) + 1;
-	for (int i = 0; i <= m; i++) {
+	for (size_t i = 0; i <= m; i++) {
 		diff = ull_cast(r.get_digit(i + k)) - ull_cast(dq.get_digit(i)) - borrow + b;
 		r.data[i + k] = diff % b;
 		borrow = 1 - diff / b;
