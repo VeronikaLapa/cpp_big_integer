@@ -1,13 +1,6 @@
 #ifndef BIG_INTEGER_H
 #define BIG_INTEGER_H
 
-#include <cstddef>
-#include <vector>
-#include <string>
-#include <cstdlib>
-
-
-using namespace std;
 
 struct big_integer 
 {
@@ -15,7 +8,7 @@ struct big_integer
 	big_integer(big_integer const& other);
 	big_integer(int a);
 	big_integer(long long a);
-	big_integer(bool nsign, vector<unsigned int> const &ndata);
+	big_integer(bool nsign, std::vector<unsigned int> const &ndata);
 	explicit big_integer(std::string const& str);
 
 	big_integer& operator=(big_integer const& other);
@@ -73,7 +66,7 @@ struct big_integer
 
 	friend big_integer operator<<(big_integer a, int b);
 	friend big_integer operator>>(big_integer a, int b);
-	friend pair<big_integer, big_integer> longdivide(big_integer const & x, big_integer const& y);
+	friend std::pair<big_integer, big_integer> longdivide(big_integer const & x, big_integer const& y);
 	friend bool cmp_prefix(big_integer& r, big_integer& dq, size_t k, size_t m);
 	friend void difference(big_integer& r, big_integer & dq, size_t k, size_t m);
 	friend std::string to_string(big_integer const& a);
@@ -116,8 +109,8 @@ bool operator>=(big_integer const& a, big_integer const& b);
 std::string to_string(big_integer const& a);
 
 bool operator==(big_integer const& a, big_integer const& b);
-pair<big_integer, big_integer> longdivide(big_integer const & x, big_integer const & y);
+std::pair<big_integer, big_integer> longdivide(big_integer const & x, big_integer const & y);
 bool cmp_prefix(big_integer& r, big_integer& dq, size_t k, size_t m);
 void difference(big_integer& r, big_integer & dq, size_t k, size_t m);
-pair<big_integer, big_integer> division(big_integer a, big_integer const& b);
+std::pair<big_integer, big_integer> division(big_integer a, big_integer const& b);
 #endif

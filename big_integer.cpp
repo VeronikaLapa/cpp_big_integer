@@ -161,7 +161,6 @@ big_integer bitwise_operation(big_integer a, big_integer const& b, FuncT f) {
 big_integer operator&(big_integer a, big_integer const& b) {
 	return bitwise_operation(a, b, [](unsigned int x, unsigned int y) {return x & y; });
 }
-
 big_integer operator|(big_integer a, big_integer const& b) {
 	return bitwise_operation(a, b, [](unsigned int x, unsigned int y) {return x | y; });
 }
@@ -178,13 +177,37 @@ big_integer& big_integer::operator^=(big_integer const& rhs) {
 	return *this = *this ^ rhs;
 }
 
+
 big_integer abs(big_integer const& a) {
 	return (a.sign ? -a : a);
 }
 
-big_integer& big_integer::operator+=(big_integer const& rhs) {
-	return *this  = *this + rhs;
+
+big_integer operator<<(big_integer a, int b) {
+	vector<unsigned int> res(a.length() + 1);
+	unsigned int carry = 0;
+	for (size_t i = 0; i < a.length(); i++) {
+		res[i] = (a.get_digit(i) << b) + carry;
+		carry = (a.get_digit(i) >> (BASE - b));
+	}
+	res[a.length()] = carry;
+	return big_integer(a.sign, res);
 }
+big_integer operator>>(big_integer a, int b) {
+	vector<unsigned int> res(a.length());
+
+	for (size_t i = 0; i < a.length(); i++) {
+		res[i] = (a.get_digit(i) >> b) | (a.get_digit(i + 1) << (BASE - b));
+	}
+	return big_integer(a.sign, res);
+}
+big_integer& big_integer::operator<<=(int rhs) {
+	return *this = *this << rhs;
+}
+big_integer& big_integer::operator>>=(int rhs) {
+	return *this = *this >> rhs;
+}
+
 big_integer operator+(big_integer a, big_integer const& b) {
 	long long carry = 0;
 	long long sum;
@@ -198,13 +221,30 @@ big_integer operator+(big_integer a, big_integer const& b) {
 	}
 	return big_integer(res.back(), res);
 }
-
+big_integer& big_integer::operator+=(big_integer const& rhs) {
+	return *this  = *this + rhs;
+}
 big_integer& big_integer::operator++() {
 	return *this = *this + 1;
 }
 big_integer big_integer::operator++(int) {
 	big_integer r = *this;
 	++*this;
+	return r;
+}
+
+big_integer operator-(big_integer a, big_integer const& b) {
+	return a + (-b);
+}
+big_integer& big_integer::operator-=(big_integer const& rhs) {
+	return *this = *this - rhs;
+}
+big_integer& big_integer::operator--() {
+	return *this = *this - 1;
+}
+big_integer big_integer::operator--(int) {
+	big_integer r = *this;
+	--*this;
 	return r;
 }
 
@@ -221,9 +261,6 @@ big_integer mul_big_short(big_integer a, unsigned int const& b) {
 	res[a.length()] = carry & MAX_DIGIT;
 	return big_integer(0, res);
 }
-
-
-
 big_integer operator*(big_integer a, big_integer const& b) {
 	big_integer res(0);
 	big_integer abs_a = abs(a);
@@ -236,11 +273,9 @@ big_integer operator*(big_integer a, big_integer const& b) {
 	if (a.sign ^ b.sign) return -res;
 	else return res;
 }
-
 big_integer& big_integer::operator*=(big_integer const& rhs) {
 	return *this = *this * rhs;
 }
-
 
 big_integer div_big_short(big_integer a, unsigned int const& b) {
 	vector<unsigned int> res(a.length());
@@ -255,7 +290,6 @@ big_integer div_big_short(big_integer a, unsigned int const& b) {
 	}
 	return big_integer(0, res);
 }
-
 unsigned int trial(unsigned int r1, unsigned int r2, unsigned int d1) {
 	unsigned long long x, res;
 	unsigned long long y = d1;
@@ -263,7 +297,6 @@ unsigned int trial(unsigned int r1, unsigned int r2, unsigned int d1) {
 	res = (x / y);
 	return min((unsigned int)res, MAX_DIGIT);
 }
-
 bool cmp_prefix(big_integer& r, big_integer& dq, size_t k, size_t m) {
 	size_t i = m, j = 0;
 	while (i != j) {
@@ -275,7 +308,6 @@ bool cmp_prefix(big_integer& r, big_integer& dq, size_t k, size_t m) {
 	}
 	return r.get_digit(i + k) < dq.get_digit(i);
 }
-
 void difference(big_integer& r, big_integer & dq, size_t k, size_t m) {
 	unsigned long long borrow = 0, diff, b = ull_cast(MAX_DIGIT) + 1;
 	for (int i = 0; i <= m; i++) {
@@ -284,10 +316,8 @@ void difference(big_integer& r, big_integer & dq, size_t k, size_t m) {
 		borrow = 1 - diff / b;
 	}
 }
-
 pair<big_integer, big_integer> longdivide(big_integer const& x, big_integer const & y) {
-	unsigned int f = (ull_cast(MAX_DIGIT) + 1) 
-		                                  / ull_cast((y.get_digit(y.length() - 1) + 1));
+	unsigned int f = (ull_cast(MAX_DIGIT) + 1) / ull_cast((y.get_digit(y.length() - 1) + 1));
 	big_integer r, q, d, dq;
 	r = mul_big_short(x, f);
 	d = mul_big_short(y, f);
@@ -309,49 +339,6 @@ pair<big_integer, big_integer> longdivide(big_integer const& x, big_integer cons
 	return { q, r };
 }
 
-
-big_integer operator-(big_integer a, big_integer const& b) {
-	return a + (-b);
-}
-big_integer& big_integer::operator-=(big_integer const& rhs) {
-	return *this = *this - rhs;
-}
-
-big_integer& big_integer::operator--() {
-	return *this = *this - 1;
-}
-big_integer big_integer::operator--(int) {
-	big_integer r = *this;
-	--*this;
-	return r;
-}
-
-big_integer operator<<(big_integer a, int b) {
-	vector<unsigned int> res(a.length() + 1);
-	unsigned int carry = 0;
-	for (size_t i = 0; i < a.length(); i++) {
-		res[i] = (a.get_digit(i) << b) + carry;
-		carry = (a.get_digit(i) >> (BASE - b));
-	}
-	res[a.length()] = carry;
-	return big_integer(a.sign, res);
-}
-
-big_integer operator>>(big_integer a, int b) {
-	vector<unsigned int> res(a.length());
-
-	for (size_t i = 0; i < a.length(); i++) {
-		res[i] = (a.get_digit(i) >> b) | (a.get_digit(i + 1) << (BASE - b));
-	}
-	return big_integer(a.sign, res);
-}
-
-big_integer& big_integer::operator<<=(int rhs) {
-	return *this = *this << rhs;
-}
-big_integer& big_integer::operator>>=(int rhs) {
-	return *this = *this >> rhs;
-}
 
 big_integer operator/(big_integer a, big_integer const& b) {
 	if (b == 0) {
